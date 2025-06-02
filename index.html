@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preparation Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #4f46e5;
+      border-radius: 4px;
+    }
+    html {
+      transition: background-color 0.3s, color 0.3s;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+  <header class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-50">
+    <h1 class="text-2xl font-semibold tracking-wide select-none">DBMS PREPARATION</h1>
+
+    <div class="flex items-center space-x-4">
+      <button id="btnNotes" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition">
+        Notes
+      </button>
+
+      <label for="darkToggle" class="flex items-center cursor-pointer select-none">
+        <div class="relative">
+          <input type="checkbox" id="darkToggle" class="sr-only" checked />
+          <div class="w-11 h-6 bg-gray-600 rounded-full shadow-inner"></div>
+          <div class="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition"></div>
+        </div>
+        <span class="ml-3 text-gray-300 font-medium"></span>
+      </label>
+    </div>
+  </header>
+
+  <div class="max-w-4xl mx-auto mt-6 px-6 w-full">
+    <div class="flex justify-between items-center mb-2">
+      <span class="text-lg font-semibold">Progress</span>
+      <span id="progressPercent" class="font-semibold text-indigo-400">0%</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden shadow-inner">
+      <div id="progressBar" class="bg-indigo-600 h-5 w-0 transition-all duration-300"></div>
+    </div>
+  </div>
+
+  <main class="max-w-4xl mx-auto mt-8 px-6 pb-20 w-full space-y-8">
+  </main>
+
+  <div id="modalNotes" class="fixed inset-0 bg-black bg-opacity-90 hidden flex flex-col z-50">
+    <header class="flex justify-between items-center p-4 border-b border-gray-700">
+      <h2 class="text-xl font-semibold text-white">Notes</h2>
+      <button id="closeNotes" class="text-gray-300 hover:text-white text-3xl font-bold leading-none">&times;</button>
+    </header>
+    <embed 
+      id="pdfEmbed" 
+      src="dbms.pdf" 
+      type="application/pdf" 
+      class="flex-grow w-full"
+      style="height: calc(100vh - 64px);"
+      aria-label="Preparation Notes PDF"
+    />
+  </div>
+
+<script>
+  const darkToggle = document.getElementById('darkToggle');
+  darkToggle.addEventListener('change', () => {
+    if (darkToggle.checked) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('prefersDark', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('prefersDark', 'false');
+    }
+  });
+
+  if(localStorage.getItem('prefersDark') === 'false') {
+    document.documentElement.classList.remove('dark');
+    darkToggle.checked = false;
+  } else {
+    document.documentElement.classList.add('dark');
+    darkToggle.checked = true;
+  }
+
+  const modules = [
+    {
+      name: "Database System Concepts, Database Users, and Architecture",
+      weight: 30,
+      topics: [
+        "Introduction to Database System with example",
+        "Characteristics of the Database Approach",
+        "Users of Database System",
+        "Advantages and disadvantages of Using a DBMS",
+        "Implications of the Database Approach",
+        "Data Models, Schemas, and Instances",
+        "DBMS Architecture and Data Independence",
+        "Database Languages and Interfaces",
+        "The Components of Database System",
+        "Classification of Database Management Systems"
+      ],
+    },
+    {
+      name: "Data Modelling & Relational Database Management System",
+      weight: 30,
+      topics: [
+        "Data Modelling Using the Entity-Relationship Model, concepts",
+        "Notation for ER diagram, mapping constraints, keys",
+        "Concepts of Super Key, candidate key, primary key",
+        "Entity Types, Entity Sets, and Attributes",
+        "Relationships, Relationship Types, Roles, and Structural Constraints",
+        "Strong vs Weak Entity Types",
+        "ER Diagrams, Naming Conventions, and Design Issues",
+        "Enhanced Entity Relationship Modelling",
+        "Subclasses, Super classes, and Inheritance",
+        "Specialization and Generalization",
+        "Constraints and Characteristics of Specialization and Generalization",
+        "Modelling of UNION Types Using Categories",
+        "The Relational Data Model, Relational Constraints, and the Relational Algebra",
+        "Relational Model Concepts, Relational Constraints and Relational Database Schemas",
+        "Update Operations and Dealing with Constraint Violations",
+        "Basic Relational Algebra Operations",
+        "Additional Relational Operations",
+        "Examples of Queries in Relational Algebra"
+      ],
+    },
+    {
+      name: "SQL and Database Design Theory and Methodology",
+      weight: 30,
+      topics: [
+        "Structured Query Language- The Relational Database Standard",
+        "Data Definition, Constraints, and Schema Changes in SQL",
+        "Types of SQL Commands, SQL Operators and their Procedure",
+        "Insert, Delete, and Update Statements in SQL",
+        "Queries and Subqueries",
+        "Aggregate Functions",
+        "Joins, Unions, Intersection, Minus",
+        "Views (Virtual Tables) in SQL",
+        "Cursors, Triggers and PL/SQL",
+        "Functional Dependencies and Normalization for Relational Databases",
+        "Informal Design Guidelines for Relation Schemas",
+        "Functional Dependencies, Normal Forms Based on Primary Keys",
+        "General Definitions of Second and Third Normal Forms",
+        "Boyce-Codd Normal Form",
+        "Multivalued Dependencies and Fourth Normal Form",
+        "Join Dependencies and Fifth Normal Form"
+      ],
+    },
+    {
+      name: "Transaction Processing, Concurrency Control and Database Recovery",
+      weight: 10,
+      topics: [
+        "Transaction Processing Concepts",
+        "Introduction to Transaction Processing",
+        "Transaction states and State Diagram",
+        "Transaction and System Concepts",
+        "Desirable Properties of Transactions",
+        "Schedules and Recoverability",
+        "Serializability of Schedules",
+        "Concurrency Control Techniques",
+        "Locking Techniques for Concurrency Control",
+        "Concurrency Control Based on Timestamp Ordering",
+        "Multiversion Concurrency Control Techniques",
+        "Validation (Optimistic) Concurrency Control Techniques",
+        "Granularity of Data Items and Multiple Granularity Locking",
+        "Database Recovery Techniques",
+        "Recovery Concepts",
+        "Recovery Techniques Based on Deferred Update",
+        "Recovery Techniques Based on Immediate Update",
+        "Shadow Paging",
+        "The ARIES Recovery Algorithm",
+        "Database Backup and Recovery from Catastrophic Failures"
+      ],
+    }
+  ];
+
+  const main = document.querySelector('main');
+  const progressBar = document.getElementById('progressBar');
+  const progressPercent = document.getElementById('progressPercent');
+
+  function saveProgress(progress) {
+    localStorage.setItem('prepProgress', JSON.stringify(progress));
+  }
+
+  function loadProgress() {
+    const saved = localStorage.getItem('prepProgress');
+    return saved ? JSON.parse(saved) : {};
+  }
+
+  function renderModules() {
+    main.innerHTML = '';
+    const progress = loadProgress();
+
+    modules.forEach((mod, mIndex) => {
+      const moduleDiv = document.createElement('section');
+      moduleDiv.className = "bg-gray-800 rounded-lg p-6 shadow-lg";
+
+      const h2 = document.createElement('h2');
+      h2.className = "text-xl font-semibold mb-4 border-b border-indigo-600 pb-2";
+      h2.textContent = mod.name;
+      moduleDiv.appendChild(h2);
+
+      const ul = document.createElement('ul');
+      ul.className = "space-y-2";  // <-- Changed here: removed scroll styles
+
+      mod.topics.forEach((topic, tIndex) => {
+        const li = document.createElement('li');
+        li.className = "flex items-center";
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = "w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer";
+        const key = `${mIndex}_${tIndex}`;
+        checkbox.checked = progress[key] || false;
+
+        checkbox.addEventListener('change', () => {
+          progress[key] = checkbox.checked;
+          saveProgress(progress);
+          updateProgress();
+        });
+
+        const label = document.createElement('label');
+        label.className = "ml-3 select-none cursor-pointer";
+        label.textContent = topic;
+
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        ul.appendChild(li);
+      });
+
+      moduleDiv.appendChild(ul);
+      main.appendChild(moduleDiv);
+    });
+  }
+
+  function updateProgress() {
+    const progress = loadProgress();
+    let totalWeight = 0;
+    let weightedSum = 0;
+
+    modules.forEach((mod, mIndex) => {
+      totalWeight += mod.weight;
+      const totalTopics = mod.topics.length;
+      let checkedCount = 0;
+
+      mod.topics.forEach((_, tIndex) => {
+        if (progress[`${mIndex}_${tIndex}`]) checkedCount++;
+      });
+
+      weightedSum += (checkedCount / totalTopics) * mod.weight;
+    });
+
+    const percent = Math.round((weightedSum / totalWeight) * 100);
+    progressPercent.textContent = `${percent}%`;
+    progressBar.style.width = `${percent}%`;
+  }
+
+  renderModules();
+  updateProgress();
+
+  // Notes modal
+  const modalNotes = document.getElementById('modalNotes');
+  const btnNotes = document.getElementById('btnNotes');
+  const closeNotes = document.getElementById('closeNotes');
+
+  btnNotes.addEventListener('click', () => {
+    modalNotes.classList.remove('hidden');
+  });
+
+  closeNotes.addEventListener('click', () => {
+    modalNotes.classList.add('hidden');
+  });
+
+</script>
+
+</body>
+</html>
