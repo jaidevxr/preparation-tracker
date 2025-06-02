@@ -302,6 +302,11 @@ const cursor = document.querySelector('.blob');
 document.addEventListener('mousemove', function(e){
   cursor.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
 });
+  .topic-row input[type="checkbox"]:checked + label {
+  color: #818cf8; /* indigo-400 */
+  text-decoration: line-through;
+}
+
 
 
 </script>
