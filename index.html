@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Preparation Tracker</title>
+  <title>DBMS Preparation Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     ::-webkit-scrollbar {
@@ -34,6 +34,15 @@
       transform: translate(calc(-50% + 15px), -50%);
       z-index: -1;
     }
+    #modalEditModule, #modalAddModule, #modalNotes {
+      background: rgba(0,0,0,0.8);
+    }
+
+    /* New style for checked topics: strikethrough */
+    .topic-label.completed {
+      text-decoration: line-through;
+      color: #a1a1aa; /* lighter gray for completed */
+    }
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
@@ -42,6 +51,7 @@
   <header class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-50">
     <h1 class="text-2xl font-semibold tracking-wide select-none">DBMS PREPARATION</h1>
     <div class="flex items-center space-x-4">
+      <button id="btnAddModule" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md shadow-md transition text-white">Add Module/Imp Topics</button>
       <button id="btnNotes" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition">Notes</button>
       <label for="darkToggle" class="flex items-center cursor-pointer select-none">
         <div class="relative">
@@ -61,10 +71,49 @@
     <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden shadow-inner">
       <div id="progressBar" class="bg-indigo-600 h-5 w-0 transition-all duration-300"></div>
     </div>
+
+    <!-- Remaining time display -->
+    <div class="mt-3 text-center text-sm text-indigo-400 font-medium" id="remainingTime">
+      Remaining time: calculating...
+    </div>
   </div>
 
   <main class="max-w-4xl mx-auto mt-8 px-6 pb-20 w-full space-y-8"></main>
 
+  <!-- Edit Module Modal -->
+  <div id="modalEditModule" class="fixed inset-0 hidden justify-center items-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-lg relative">
+      <h3 class="text-xl font-semibold mb-4 text-indigo-400">Edit Module</h3>
+      <label class="block mb-2 font-medium">Module Name</label>
+      <input id="editModuleName" type="text" class="w-full rounded px-3 py-2 mb-4 text-gray-900" />
+      <label class="block mb-2 font-medium">Topics (comma separated)</label>
+      <textarea id="editModuleTopics" rows="5" class="w-full rounded px-3 py-2 mb-4 text-gray-900"></textarea>
+      <div class="flex justify-between items-center">
+        <button id="deleteModuleBtn" class="bg-red-600 hover:bg-red-700 text-white rounded px-4 py-2">Delete Module</button>
+        <div>
+          <button id="cancelEditBtn" class="mr-3 px-4 py-2 rounded bg-gray-600 hover:bg-gray-700">Cancel</button>
+          <button id="saveEditBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-4 py-2">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Module Modal -->
+  <div id="modalAddModule" class="fixed inset-0 hidden justify-center items-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-lg relative">
+      <h3 class="text-xl font-semibold mb-4 text-green-400">Add New Module/ Imp Topics</h3>
+      <label class="block mb-2 font-medium">Module Name</label>
+      <input id="addModuleName" type="text" class="w-full rounded px-3 py-2 mb-4 text-gray-900" />
+      <label class="block mb-2 font-medium">Topics (comma separated)</label>
+      <textarea id="addModuleTopics" rows="5" class="w-full rounded px-3 py-2 mb-4 text-gray-900"></textarea>
+      <div class="flex justify-end items-center">
+        <button id="cancelAddBtn" class="mr-3 px-4 py-2 rounded bg-gray-600 hover:bg-gray-700">Cancel</button>
+        <button id="saveAddBtn" class="bg-green-600 hover:bg-green-700 text-white rounded px-4 py-2">Add Module/Imp Topics</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Modal -->
   <div id="modalNotes" class="fixed inset-0 bg-black bg-opacity-90 hidden flex flex-col z-50">
     <header class="flex justify-between items-center p-4 border-b border-gray-700">
       <h2 class="text-xl font-semibold text-white">Notes</h2>
@@ -73,27 +122,28 @@
     <embed id="pdfEmbed" src="dbms.pdf" type="application/pdf" class="flex-grow w-full" style="height: calc(100vh - 64px);" />
   </div>
 
-  <script>
-    const darkToggle = document.getElementById('darkToggle');
-    darkToggle.addEventListener('change', () => {
-      if (darkToggle.checked) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('prefersDark', 'true');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('prefersDark', 'false');
-      }
-    });
-
-    if (localStorage.getItem('prefersDark') === 'false') {
+<script>
+  // Dark mode toggle
+  const darkToggle = document.getElementById('darkToggle');
+  darkToggle.addEventListener('change', () => {
+    if (darkToggle.checked) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('prefersDark', 'true');
+    } else {
       document.documentElement.classList.remove('dark');
-      darkToggle.checked = false;
+      localStorage.setItem('prefersDark', 'false');
     }
+  });
 
-    const modules = [
+  if (localStorage.getItem('prefersDark') === 'false') {
+    document.documentElement.classList.remove('dark');
+    darkToggle.checked = false;
+  }
+
+  // Initial modules data (try to load from localStorage first)
+  let modules = JSON.parse(localStorage.getItem("dbmsModules")) || [
     {
       name: "Database System Concepts, Database Users, and Architecture",
-      weight: 30,
       topics: [
         "Introduction to Database System with example",
         "Characteristics of the Database Approach",
@@ -109,7 +159,6 @@
     },
     {
       name: "Data Modelling & Relational Database Management System",
-      weight: 30,
       topics: [
         "Data Modelling Using the Entity-Relationship Model, concepts",
         "Notation for ER diagram, mapping constraints, keys",
@@ -133,7 +182,6 @@
     },
     {
       name: "SQL and Database Design Theory and Methodology",
-      weight: 30,
       topics: [
         "Structured Query Language- The Relational Database Standard",
         "Data Definition, Constraints, and Schema Changes in SQL",
@@ -145,153 +193,264 @@
         "Views (Virtual Tables) in SQL",
         "Cursors, Triggers and PL/SQL",
         "Functional Dependencies and Normalization for Relational Databases",
-        "Informal Design Guidelines for Relation Schemas",
-        "Functional Dependencies, Normal Forms Based on Primary Keys",
-        "General Definitions of Second and Third Normal Forms",
+        "Introduction to Schema Refinement",
+        "Problems Caused by Redundancy",
+        "Functional Dependencies and Normal Forms",
+        "First, Second, Third Normal Form",
         "Boyce-Codd Normal Form",
-        "Multivalued Dependencies and Fourth Normal Form",
+        "Multi-valued Dependencies and Fourth Normal Form",
         "Join Dependencies and Fifth Normal Form"
       ],
     },
     {
-      name: "Transaction Processing, Concurrency Control and Database Recovery",
-      weight: 10,
+      name: "Transaction Processing and Recovery in DBMS",
       topics: [
-        "Transaction Processing Concepts",
-        "Introduction to Transaction Processing",
-        "Transaction states and State Diagram",
-        "Transaction and System Concepts",
-        "Desirable Properties of Transactions",
-        "Schedules and Recoverability",
-        "Serializability of Schedules",
-        "Concurrency Control Techniques",
-        "Locking Techniques for Concurrency Control",
-        "Concurrency Control Based on Timestamp Ordering",
-        "Multiversion Concurrency Control Techniques",
-        "Validation (Optimistic) Concurrency Control Techniques",
-        "Granularity of Data Items and Multiple Granularity Locking",
-        "Database Recovery Techniques",
-        "Recovery Concepts",
-        "Recovery Techniques Based on Deferred Update",
-        "Recovery Techniques Based on Immediate Update",
+        "Transaction Concepts and Transaction States",
+        "Implementation of Atomicity and Durability",
+        "Concurrent Executions",
+        "Serializability",
+        "Testing for Serializability",
+        "Locking Techniques",
+        "Transaction Support in SQL",
+        "Recovery System, Log-based Recovery",
         "Shadow Paging",
-        "The ARIES Recovery Algorithm",
-        "Database Backup and Recovery from Catastrophic Failures"
+        "Recovery with Concurrent Transactions",
+        "Buffer Management",
+        "Failure with Loss of Nonvolatile Storage",
+        "Advanced Recovery Techniques"
       ],
     }
   ];
 
-    const main = document.querySelector('main');
-    const progressBar = document.getElementById('progressBar');
-    const progressPercent = document.getElementById('progressPercent');
+  // Save modules to localStorage helper
+  function saveModules() {
+    localStorage.setItem("dbmsModules", JSON.stringify(modules));
+  }
 
-    function saveProgress(progress) {
-      localStorage.setItem('prepProgress', JSON.stringify(progress));
-    }
+  // Calculate overall progress %
+  function updateProgress() {
+    let totalTopics = 0;
+    let completedTopics = 0;
+    modules.forEach(m => {
+      totalTopics += m.topics.length;
+      if(m.progress) {
+        completedTopics += Object.values(m.progress).filter(v => v === true).length;
+      }
+    });
+    const percent = totalTopics ? (completedTopics / totalTopics) * 100 : 0;
+    document.getElementById("progressPercent").textContent = `${percent.toFixed(2)}%`;
+    document.getElementById("progressBar").style.width = percent + "%";
+    t
+  }
 
-    function loadProgress() {
-      const saved = localStorage.getItem('prepProgress');
-      return saved ? JSON.parse(saved) : {};
-    }
+  // Render modules & topics
+  function render() {
+    const main = document.querySelector("main");
+    main.innerHTML = "";
 
-    function renderModules() {
-      main.innerHTML = '';
-      const progress = loadProgress();
+    modules.forEach((module, mIndex) => {
+      const section = document.createElement("section");
+      section.className = "bg-gray-800 rounded-md p-4 shadow-md";
 
-      modules.forEach((mod, mIndex) => {
-        const moduleDiv = document.createElement('section');
-        moduleDiv.className = "bg-gray-800 rounded-lg p-6 shadow-lg";
+      // Module header
+      const header = document.createElement("header");
+      header.className = "flex items-center justify-between mb-3";
 
-        const h2 = document.createElement('h2');
-        h2.className = "text-xl font-semibold mb-4 border-b border-indigo-600 pb-2";
-        h2.textContent = mod.name;
-        moduleDiv.appendChild(h2);
+      const title = document.createElement("h2");
+      title.textContent = module.name;
+      title.className = "font-semibold text-lg text-indigo-400";
 
-        const ul = document.createElement('ul');
-        ul.className = "space-y-2";
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.className = "text-indigo-400 hover:text-indigo-600";
+      editBtn.addEventListener("click", () => openEditModal(mIndex));
 
-        mod.topics.forEach((topic, tIndex) => {
-          const li = document.createElement('li');
-          li.className = "flex items-center";
+      header.appendChild(title);
+      header.appendChild(editBtn);
+      section.appendChild(header);
 
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.className = "w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer";
-          const key = `${mIndex}_${tIndex}`;
-          checkbox.checked = progress[key] || false;
+      // Topics list
+      const ul = document.createElement("ul");
+      ul.className = "space-y-2";
 
-          const label = document.createElement('label');
-          label.textContent = topic;
 
-          const updateLabelStyle = () => {
-            label.className = "ml-3 select-none cursor-pointer transition";
-            if (checkbox.checked) {
-              label.classList.add("line-through", "opacity-50");
-            }
-          };
+      module.topics.forEach((topic, tIndex) => {
+        const li = document.createElement("li");
 
-          updateLabelStyle();
+        const id = `module${mIndex}_topic${tIndex}`;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = id;
+        checkbox.checked = module.progress && module.progress[tIndex] === true;
 
-          checkbox.addEventListener('change', () => {
-            progress[key] = checkbox.checked;
-            saveProgress(progress);
-            updateLabelStyle();
-            updateProgress();
-          });
+        const label = document.createElement("label");
+        label.htmlFor = id;
+        label.className = "ml-2 cursor-pointer topic-label";
+        label.textContent = topic;
+        if (checkbox.checked) {
+          label.classList.add("completed");  // Add strikethrough if completed
+        }
 
-          li.appendChild(checkbox);
-          li.appendChild(label);
-          ul.appendChild(li);
+        checkbox.addEventListener("change", () => {
+          if (!module.progress) module.progress = {};
+          module.progress[tIndex] = checkbox.checked;
+          if(checkbox.checked) {
+            label.classList.add("completed");
+          } else {
+            label.classList.remove("completed");
+          }
+          saveModules();
+          updateProgress();
         });
 
-        moduleDiv.appendChild(ul);
-        main.appendChild(moduleDiv);
-      });
-    }
-
-    function updateProgress() {
-      const progress = loadProgress();
-      let totalWeight = 0;
-      let weightedSum = 0;
-
-      modules.forEach((mod, mIndex) => {
-        totalWeight += mod.weight;
-        const totalTopics = mod.topics.length;
-        let checkedCount = 0;
-
-        mod.topics.forEach((_, tIndex) => {
-          if (progress[`${mIndex}_${tIndex}`]) checkedCount++;
-        });
-
-        weightedSum += (checkedCount / totalTopics) * mod.weight;
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        ul.appendChild(li);
       });
 
-      const percent = Math.round((weightedSum / totalWeight) * 100);
-      progressPercent.textContent = `${percent}%`;
-      progressBar.style.width = `${percent}%`;
-    }
+      section.appendChild(ul);
+      main.appendChild(section);
+    });
 
-    renderModules();
     updateProgress();
+    updateRemainingTime();
+  }
 
-    // Notes modal
-    const modalNotes = document.getElementById('modalNotes');
-    const btnNotes = document.getElementById('btnNotes');
-    const closeNotes = document.getElementById('closeNotes');
+  // Remaining time calculation
+  function updateRemainingTime() {
+    const deadline = new Date("2025-06-04T13:59:59");
+    const now = new Date();
+    let diff = deadline - now;
 
-    btnNotes.addEventListener('click', () => {
-      modalNotes.classList.remove('hidden');
+    if (diff <= 0) {
+      document.getElementById("remainingTime").textContent = "Deadline reached!";
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    diff -= days * (1000 * 60 * 60 * 24);
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    diff -= hours * (1000 * 60 * 60);
+
+    const minutes = Math.floor(diff / (1000 * 60));
+    diff -= minutes * (1000 * 60);
+
+    const seconds = Math.floor(diff / 1000);
+
+    document.getElementById("remainingTime").textContent = 
+      `Remaining time: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  // Modal Elements
+  const modalEdit = document.getElementById("modalEditModule");
+  const modalAdd = document.getElementById("modalAddModule");
+  const modalNotes = document.getElementById("modalNotes");
+
+  // Edit Modal Inputs and Buttons
+  const editModuleName = document.getElementById("editModuleName");
+  const editModuleTopics = document.getElementById("editModuleTopics");
+  const saveEditBtn = document.getElementById("saveEditBtn");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+  const deleteModuleBtn = document.getElementById("deleteModuleBtn");
+
+  // Add Modal Inputs and Buttons
+  const addModuleName = document.getElementById("addModuleName");
+  const addModuleTopics = document.getElementById("addModuleTopics");
+  const saveAddBtn = document.getElementById("saveAddBtn");
+  const cancelAddBtn = document.getElementById("cancelAddBtn");
+
+  let currentEditIndex = null;
+
+  // Open edit modal for module
+  function openEditModal(index) {
+    currentEditIndex = index;
+    const module = modules[index];
+    editModuleName.value = module.name;
+    editModuleTopics.value = module.topics.join(", ");
+    modalEdit.classList.remove("hidden");
+  }
+
+  // Save edit changes
+  saveEditBtn.addEventListener("click", () => {
+    const name = editModuleName.value.trim();
+    const topicsRaw = editModuleTopics.value.trim();
+    if (!name || !topicsRaw) {
+      alert("Module name and topics cannot be empty!");
+      return;
+    }
+    modules[currentEditIndex].name = name;
+    modules[currentEditIndex].topics = topicsRaw.split(",").map(t => t.trim()).filter(t => t);
+    modules[currentEditIndex].progress = {}; // reset progress on edit
+    saveModules();
+    render();
+    closeEditModal();
+  });
+
+  cancelEditBtn.addEventListener("click", closeEditModal);
+
+  function closeEditModal() {
+    modalEdit.classList.add("hidden");
+    currentEditIndex = null;
+  }
+
+  // Delete module
+  deleteModuleBtn.addEventListener("click", () => {
+    if (confirm("Are you sure you want to delete this module?")) {
+      modules.splice(currentEditIndex, 1);
+      saveModules();
+      render();
+      closeEditModal();
+    }
+  });
+
+  // Add module modal handlers
+  document.getElementById("btnAddModule").addEventListener("click", () => {
+    addModuleName.value = "";
+    addModuleTopics.value = "";
+    modalAdd.classList.remove("hidden");
+  });
+
+  cancelAddBtn.addEventListener("click", () => {
+    modalAdd.classList.add("hidden");
+  });
+
+  saveAddBtn.addEventListener("click", () => {
+    const name = addModuleName.value.trim();
+    const topicsRaw = addModuleTopics.value.trim();
+    if (!name || !topicsRaw) {
+      alert("Module name and topics cannot be empty!");
+      return;
+    }
+    modules.push({
+      name,
+      topics: topicsRaw.split(",").map(t => t.trim()).filter(t => t),
+      progress: {},
     });
+    saveModules();
+    render();
+    modalAdd.classList.add("hidden");
+  });
 
-    closeNotes.addEventListener('click', () => {
-      modalNotes.classList.add('hidden');
-    });
+  // Notes modal open/close
+  document.getElementById("btnNotes").addEventListener("click", () => {
+    modalNotes.classList.remove("hidden");
+  });
+  document.getElementById("closeNotes").addEventListener("click", () => {
+    modalNotes.classList.add("hidden");
+  });
 
-    // Move gradient blob with cursor
-    const cursor = document.querySelector('.blob');
+  // Update time every second
+  setInterval(() => {
+    updateRemainingTime();
+  }, 1000);
+
+  // Initial render
+  render();
+  const cursor = document.querySelector('.blob');
     document.addEventListener('mousemove', function(e){
       cursor.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
     });
-  </script>
+</script>
 </body>
 </html>
