@@ -6,58 +6,49 @@
   <title>Preparation Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: #4f46e5;
-    border-radius: 4px;
-  }
-  html {
-    transition: background-color 0.3s, color 0.3s;
-  }
-
-  /* Gradient blob background */
-  .blob {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 650px;
-    height: 650px;
-    border-radius: 100%;
-    background-image: linear-gradient(#1100ff 10%, #ff00f2);
-    filter: blur(250px);
-    transition: all 450ms ease-out;
-    position: fixed;
-    pointer-events: none;
-    left: 0;
-    top: 0;
-    transform: translate(calc(-50% + 15px), -50%);
-    z-index: -1;
-  }
-</style>
-
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #4f46e5;
+      border-radius: 4px;
+    }
+    html {
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .blob {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 650px;
+      height: 650px;
+      border-radius: 100%;
+      background-image: linear-gradient(#1100ff 10%, #ff00f2);
+      filter: blur(250px);
+      transition: all 450ms ease-out;
+      position: fixed;
+      pointer-events: none;
+      left: 0;
+      top: 0;
+      transform: translate(calc(-50% + 15px), -50%);
+      z-index: -1;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
   <div class="blob"></div>
 
-
   <header class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-50">
     <h1 class="text-2xl font-semibold tracking-wide select-none">DBMS PREPARATION</h1>
-
     <div class="flex items-center space-x-4">
-      <button id="btnNotes" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition">
-        Notes
-      </button>
-
+      <button id="btnNotes" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition">Notes</button>
       <label for="darkToggle" class="flex items-center cursor-pointer select-none">
         <div class="relative">
           <input type="checkbox" id="darkToggle" class="sr-only" checked />
           <div class="w-11 h-6 bg-gray-600 rounded-full shadow-inner"></div>
           <div class="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition"></div>
         </div>
-        <span class="ml-3 text-gray-300 font-medium"></span>
       </label>
     </div>
   </header>
@@ -72,45 +63,34 @@
     </div>
   </div>
 
-  <main class="max-w-4xl mx-auto mt-8 px-6 pb-20 w-full space-y-8">
-  </main>
+  <main class="max-w-4xl mx-auto mt-8 px-6 pb-20 w-full space-y-8"></main>
 
   <div id="modalNotes" class="fixed inset-0 bg-black bg-opacity-90 hidden flex flex-col z-50">
     <header class="flex justify-between items-center p-4 border-b border-gray-700">
       <h2 class="text-xl font-semibold text-white">Notes</h2>
       <button id="closeNotes" class="text-gray-300 hover:text-white text-3xl font-bold leading-none">&times;</button>
     </header>
-    <embed 
-      id="pdfEmbed" 
-      src="dbms.pdf" 
-      type="application/pdf" 
-      class="flex-grow w-full"
-      style="height: calc(100vh - 64px);"
-      aria-label="Preparation Notes PDF"
-    />
+    <embed id="pdfEmbed" src="dbms.pdf" type="application/pdf" class="flex-grow w-full" style="height: calc(100vh - 64px);" />
   </div>
 
-<script>
-  const darkToggle = document.getElementById('darkToggle');
-  darkToggle.addEventListener('change', () => {
-    if (darkToggle.checked) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('prefersDark', 'true');
-    } else {
+  <script>
+    const darkToggle = document.getElementById('darkToggle');
+    darkToggle.addEventListener('change', () => {
+      if (darkToggle.checked) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('prefersDark', 'true');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('prefersDark', 'false');
+      }
+    });
+
+    if (localStorage.getItem('prefersDark') === 'false') {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('prefersDark', 'false');
+      darkToggle.checked = false;
     }
-  });
 
-  if(localStorage.getItem('prefersDark') === 'false') {
-    document.documentElement.classList.remove('dark');
-    darkToggle.checked = false;
-  } else {
-    document.documentElement.classList.add('dark');
-    darkToggle.checked = true;
-  }
-
-  const modules = [
+    const modules = [
     {
       name: "Database System Concepts, Database Users, and Architecture",
       weight: 30,
@@ -201,111 +181,117 @@
     }
   ];
 
-  const main = document.querySelector('main');
-  const progressBar = document.getElementById('progressBar');
-  const progressPercent = document.getElementById('progressPercent');
+    const main = document.querySelector('main');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
 
-  function saveProgress(progress) {
-    localStorage.setItem('prepProgress', JSON.stringify(progress));
-  }
+    function saveProgress(progress) {
+      localStorage.setItem('prepProgress', JSON.stringify(progress));
+    }
 
-  function loadProgress() {
-    const saved = localStorage.getItem('prepProgress');
-    return saved ? JSON.parse(saved) : {};
-  }
+    function loadProgress() {
+      const saved = localStorage.getItem('prepProgress');
+      return saved ? JSON.parse(saved) : {};
+    }
 
-  function renderModules() {
-    main.innerHTML = '';
-    const progress = loadProgress();
+    function renderModules() {
+      main.innerHTML = '';
+      const progress = loadProgress();
 
-    modules.forEach((mod, mIndex) => {
-      const moduleDiv = document.createElement('section');
-      moduleDiv.className = "bg-gray-800 rounded-lg p-6 shadow-lg";
+      modules.forEach((mod, mIndex) => {
+        const moduleDiv = document.createElement('section');
+        moduleDiv.className = "bg-gray-800 rounded-lg p-6 shadow-lg";
 
-      const h2 = document.createElement('h2');
-      h2.className = "text-xl font-semibold mb-4 border-b border-indigo-600 pb-2";
-      h2.textContent = mod.name;
-      moduleDiv.appendChild(h2);
+        const h2 = document.createElement('h2');
+        h2.className = "text-xl font-semibold mb-4 border-b border-indigo-600 pb-2";
+        h2.textContent = mod.name;
+        moduleDiv.appendChild(h2);
 
-      const ul = document.createElement('ul');
-      ul.className = "space-y-2";  // <-- Changed here: removed scroll styles
+        const ul = document.createElement('ul');
+        ul.className = "space-y-2";
 
-      mod.topics.forEach((topic, tIndex) => {
-        const li = document.createElement('li');
-        li.className = "flex items-center";
+        mod.topics.forEach((topic, tIndex) => {
+          const li = document.createElement('li');
+          li.className = "flex items-center";
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = "w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer";
-        const key = `${mIndex}_${tIndex}`;
-        checkbox.checked = progress[key] || false;
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = "w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer";
+          const key = `${mIndex}_${tIndex}`;
+          checkbox.checked = progress[key] || false;
 
-        checkbox.addEventListener('change', () => {
-          progress[key] = checkbox.checked;
-          saveProgress(progress);
-          updateProgress();
+          const label = document.createElement('label');
+          label.textContent = topic;
+
+          const updateLabelStyle = () => {
+            label.className = "ml-3 select-none cursor-pointer transition";
+            if (checkbox.checked) {
+              label.classList.add("line-through", "opacity-50");
+            }
+          };
+
+          updateLabelStyle();
+
+          checkbox.addEventListener('change', () => {
+            progress[key] = checkbox.checked;
+            saveProgress(progress);
+            updateLabelStyle();
+            updateProgress();
+          });
+
+          li.appendChild(checkbox);
+          li.appendChild(label);
+          ul.appendChild(li);
         });
 
-        const label = document.createElement('label');
-        label.className = "ml-3 select-none cursor-pointer";
-        label.textContent = topic;
+        moduleDiv.appendChild(ul);
+        main.appendChild(moduleDiv);
+      });
+    }
 
-        li.appendChild(checkbox);
-        li.appendChild(label);
-        ul.appendChild(li);
+    function updateProgress() {
+      const progress = loadProgress();
+      let totalWeight = 0;
+      let weightedSum = 0;
+
+      modules.forEach((mod, mIndex) => {
+        totalWeight += mod.weight;
+        const totalTopics = mod.topics.length;
+        let checkedCount = 0;
+
+        mod.topics.forEach((_, tIndex) => {
+          if (progress[`${mIndex}_${tIndex}`]) checkedCount++;
+        });
+
+        weightedSum += (checkedCount / totalTopics) * mod.weight;
       });
 
-      moduleDiv.appendChild(ul);
-      main.appendChild(moduleDiv);
-    });
-  }
+      const percent = Math.round((weightedSum / totalWeight) * 100);
+      progressPercent.textContent = `${percent}%`;
+      progressBar.style.width = `${percent}%`;
+    }
 
-  function updateProgress() {
-    const progress = loadProgress();
-    let totalWeight = 0;
-    let weightedSum = 0;
+    renderModules();
+    updateProgress();
 
-    modules.forEach((mod, mIndex) => {
-      totalWeight += mod.weight;
-      const totalTopics = mod.topics.length;
-      let checkedCount = 0;
+    // Notes modal
+    const modalNotes = document.getElementById('modalNotes');
+    const btnNotes = document.getElementById('btnNotes');
+    const closeNotes = document.getElementById('closeNotes');
 
-      mod.topics.forEach((_, tIndex) => {
-        if (progress[`${mIndex}_${tIndex}`]) checkedCount++;
-      });
-
-      weightedSum += (checkedCount / totalTopics) * mod.weight;
+    btnNotes.addEventListener('click', () => {
+      modalNotes.classList.remove('hidden');
     });
 
-    const percent = Math.round((weightedSum / totalWeight) * 100);
-    progressPercent.textContent = `${percent}%`;
-    progressBar.style.width = `${percent}%`;
-  }
+    closeNotes.addEventListener('click', () => {
+      modalNotes.classList.add('hidden');
+    });
 
-  renderModules();
-  updateProgress();
-
-  // Notes modal
-  const modalNotes = document.getElementById('modalNotes');
-  const btnNotes = document.getElementById('btnNotes');
-  const closeNotes = document.getElementById('closeNotes');
-
-  btnNotes.addEventListener('click', () => {
-    modalNotes.classList.remove('hidden');
-  });
-
-  closeNotes.addEventListener('click', () => {
-    modalNotes.classList.add('hidden');
-  });
-  // Move gradient blob with cursor
-const cursor = document.querySelector('.blob');
-document.addEventListener('mousemove', function(e){
-  cursor.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
-});
-  
-
-
-</script>
-
+    // Move gradient blob with cursor
+    const cursor = document.querySelector('.blob');
+    document.addEventListener('mousemove', function(e){
+      cursor.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
+    });
+  </script>
 </body>
 </html>
