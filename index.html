@@ -43,6 +43,59 @@
       text-decoration: line-through;
       color: #a1a1aa; /* lighter gray for completed */
     }
+    @media (max-width: 480px) {
+    .blob {
+      width: 200px;
+      height: 200px;
+      filter: blur(90px);
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .modal {
+      width: 90%;
+      padding: 1rem;
+    }
+
+    .topic-label {
+      display: block;
+      margin-left: 0.5rem;
+      word-break: break-word;
+    }
+
+    .title {
+      font-size: 1.25rem; /* text-xl */
+    }
+
+    .embed-container {
+      height: 60vh;
+    }
+  }
+
+  /* Tablets (up to 768px) */
+  @media (max-width: 768px) {
+    .blob {
+      width: 300px;
+      height: 300px;
+      filter: blur(120px);
+    }
+
+    .modal {
+      width: 80%;
+    }
+
+    .title {
+      font-size: 1.5rem; /* text-2xl */
+    }
+
+    .embed-container {
+      height: 75vh;
+    }
+  }
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
@@ -115,7 +168,8 @@
 
   <!-- Notes Modal -->
   <div id="modalNotes" class="fixed inset-0 bg-black bg-opacity-90 hidden flex flex-col z-50">
-    <header class="flex justify-between items-center p-4 border-b border-gray-700">
+    <header class="flex header items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-50">
+
       <h2 class="text-xl font-semibold text-white">Notes</h2>
       <button id="closeNotes" class="text-gray-300 hover:text-white text-3xl font-bold leading-none">&times;</button>
     </header>
