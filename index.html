@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DBMS Preparation Tracker</title>
+  <title>OS Preparation Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     ::-webkit-scrollbar {
@@ -102,7 +102,7 @@
   <div class="blob"></div>
 
   <header class="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-50">
-    <h1 class="text-2xl font-semibold tracking-wide select-none">DBMS PREPARATION</h1>
+    <h1 class="text-2xl font-semibold tracking-wide select-none">OS PREPARATION</h1>
     <div class="flex items-center space-x-4">
       <br></br>
       <button id="btnAddModule" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition text-white">Add Module/Imp Topics</button>
@@ -174,7 +174,7 @@
       <h2 class="text-xl font-semibold text-white">Notes</h2>
       <button id="closeNotes" class="text-gray-300 hover:text-white text-3xl font-bold leading-none">&times;</button>
     </header>
-    <embed id="pdfEmbed" src="dbms.pdf" type="application/pdf" class="flex-grow w-full" style="height: calc(100vh - 64px);" />
+    <embed id="pdfEmbed" src="os.pdf" type="application/pdf" class="flex-grow w-full" style="height: calc(100vh - 64px);" />
   </div>
 
 <script>
@@ -196,107 +196,54 @@
   }
 
   // Initial modules data (try to load from localStorage first)
-  let modules = JSON.parse(localStorage.getItem("dbmsModules")) || [
+  let modules = JSON.parse(localStorage.getItem("osModules")) || [
     {
-      name: "Database System Concepts, Database Users, and Architecture",
+      name: "Introduction to Operating System and Process Concept",
       topics: [
-        "Introduction to Database System with example",
-        "Characteristics of the Database Approach",
-        "Users of Database System",
-        "Advantages and disadvantages of Using a DBMS",
-        "Implications of the Database Approach",
-        "Data Models, Schemas, and Instances",
-        "DBMS Architecture and Data Independence",
-        "Database Languages and Interfaces",
-        "The Components of Database System",
-        "Classification of Database Management Systems"
+        "Operating system and functions",
+        "Classification of Operating systems", "Operating System Structure", "Operating System Services", "System call and System program", "Process concept", "Process state", "Process control block", "Context switching", "Operation on process", "Threads and their management", "Benefits of multithreading", "Types of threads", "Threading issues", "CPU-scheduling", "Scheduling criteria", "Scheduling Algorithms", "Concurrent Processes", "Inter Process Communication models and Schemes"
       ],
     },
     {
-      name: "Data Modelling & Relational Database Management System",
+      name: "Process Synchronization and Deadlock",
       topics: [
-        "Data Modelling Using the Entity-Relationship Model, concepts",
-        "Notation for ER diagram, mapping constraints, keys",
-        "Concepts of Super Key, candidate key, primary key",
-        "Entity Types, Entity Sets, and Attributes",
-        "Relationships, Relationship Types, Roles, and Structural Constraints",
-        "Strong vs Weak Entity Types",
-        "ER Diagrams, Naming Conventions, and Design Issues",
-        "Enhanced Entity Relationship Modelling",
-        "Subclasses, Super classes, and Inheritance",
-        "Specialization and Generalization",
-        "Constraints and Characteristics of Specialization and Generalization",
-        "Modelling of UNION Types Using Categories",
-        "The Relational Data Model, Relational Constraints, and the Relational Algebra",
-        "Relational Model Concepts, Relational Constraints and Relational Database Schemas",
-        "Update Operations and Dealing with Constraint Violations",
-        "Basic Relational Algebra Operations",
-        "Additional Relational Operations",
-        "Examples of Queries in Relational Algebra"
+        "Process synchronization", "Producer/Consumer Problem", "Critical Section Problem", "Peterson’s solution", "Synchronization of hardware", "Semaphore", "Classical problems of synchronization", "Deadlock", "Deadlock characterization", "Deadlock Prevention", "Deadlock Avoidance", "Resource allocation graph algorithm", "Banker’s algorithm", "Deadlock detection", "Recovery from deadlock"
       ],
     },
     {
-      name: "SQL and Database Design Theory and Methodology",
+      name: "Memory Management",
       topics: [
-        "Structured Query Language- The Relational Database Standard",
-        "Data Definition, Constraints, and Schema Changes in SQL",
-        "Types of SQL Commands, SQL Operators and their Procedure",
-        "Insert, Delete, and Update Statements in SQL",
-        "Queries and Subqueries",
-        "Aggregate Functions",
-        "Joins, Unions, Intersection, Minus",
-        "Views (Virtual Tables) in SQL",
-        "Cursors, Triggers and PL/SQL",
-        "Functional Dependencies and Normalization for Relational Databases",
-        "Introduction to Schema Refinement",
-        "Problems Caused by Redundancy",
-        "Functional Dependencies and Normal Forms",
-        "First, Second, Third Normal Form",
-        "Boyce-Codd Normal Form",
-        "Multi-valued Dependencies and Fourth Normal Form",
-        "Join Dependencies and Fifth Normal Form"
+        "Memory Management", "Multiprogramming with fixed partitions", "Multiprogramming with variable partitions", "Paging", "Segmentation", "Paged segmentation", "Virtual memory concepts", "Demand paging", "Performance of demand paging", "Page replacement algorithms", "Thrashing"
       ],
     },
     {
-      name: "Transaction Processing and Recovery in DBMS",
+      name: "I/O Management and File System",
       topics: [
-        "Transaction Concepts and Transaction States",
-        "Implementation of Atomicity and Durability",
-        "Concurrent Executions",
-        "Serializability",
-        "Testing for Serializability",
-        "Locking Techniques",
-        "Transaction Support in SQL",
-        "Recovery System, Log-based Recovery",
-        "Shadow Paging",
-        "Recovery with Concurrent Transactions",
-        "Buffer Management",
-        "Failure with Loss of Nonvolatile Storage",
-        "Advanced Recovery Techniques"
+        "File System Structure", "File System Implementation", "Directory Implementation and Allocation Methods", "Free space Management", "Kernel I/O Subsystems", "Disk Structure", "Disk Scheduling", "Disk Management", "Swap-Space Management"
       ],
     }
   ];
 
   // Save modules to localStorage helper
   function saveModules() {
-    localStorage.setItem("dbmsModules", JSON.stringify(modules));
+    localStorage.setItem("osModules", JSON.stringify(modules));
   }
 
   // Calculate overall progress %
   function updateProgress() {
-    let totalTopics = 0;
-    let completedTopics = 0;
-    modules.forEach(m => {
-      totalTopics += m.topics.length;
-      if(m.progress) {
-        completedTopics += Object.values(m.progress).filter(v => v === true).length;
-      }
-    });
-    const percent = totalTopics ? (completedTopics / totalTopics) * 100 : 0;
-    document.getElementById("progressPercent").textContent = `${percent.toFixed(2)}%`;
-    document.getElementById("progressBar").style.width = percent + "%";
-    t
-  }
+  let totalTopics = 0;
+  let completedTopics = 0;
+  modules.forEach(m => {
+    totalTopics += m.topics.length;
+    if(m.progress) {
+      completedTopics += Object.values(m.progress).filter(v => v === true).length;
+    }
+  });
+  const percent = totalTopics ? (completedTopics / totalTopics) * 100 : 0;
+  document.getElementById("progressPercent").textContent = `${percent.toFixed(2)}%`;
+  document.getElementById("progressBar").style.width = percent + "%";
+}
+
 
   // Render modules & topics
   function render() {
@@ -373,7 +320,7 @@
 
   // Remaining time calculation
   function updateRemainingTime() {
-    const deadline = new Date("2025-06-04T13:59:59");
+    const deadline = new Date("2025-06-06T13:59:59");
     const now = new Date();
     let diff = deadline - now;
 
